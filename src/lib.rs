@@ -16,6 +16,7 @@ pub trait Iterator {
 }
 
 pub mod filter;
+pub mod flat_map;
 pub mod flatten;
 pub mod into_iter;
 pub mod map;
