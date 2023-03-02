@@ -64,7 +64,7 @@ where
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use crate::Iterator;
     #[test]
     fn into_iter() {
