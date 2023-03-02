@@ -15,11 +15,13 @@ pub trait Iterator {
     }
 }
 
+pub mod filter;
 pub mod flatten;
 pub mod into_iter;
 pub mod map;
 
 pub use {
+    filter::Filter,
     flatten::Flatten,
     into_iter::{IntoIter, IntoIterator},
     map::Map,
