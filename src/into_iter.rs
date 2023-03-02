@@ -50,18 +50,6 @@ impl<T> crate::IntoIterator for Vec<T> {
         }
     }
 }
-impl<I> IntoIterator for I
-where
-    I: crate::Iterator,
-{
-    type Item = I::Item;
-    type IntoIter = I;
-
-    #[inline]
-    fn into_iter(self) -> I {
-        self
-    }
-}
 
 #[cfg(test)]
 mod tests {

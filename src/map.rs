@@ -1,12 +1,8 @@
-pub struct Map<O, F, B>
-where
-    O: crate::Iterator,
-    F: FnMut(O::Item) -> B,
-{
+pub struct Map<O, F> {
     outer: O,
     f: F,
 }
-impl<O, F, B> Map<O, F, B>
+impl<O, F, B> Map<O, F>
 where
     O: crate::Iterator,
     F: FnMut(O::Item) -> B,
@@ -16,7 +12,7 @@ where
     }
 }
 
-impl<O, F, B> crate::Iterator for Map<O, F, B>
+impl<O, F, B> crate::Iterator for Map<O, F>
 where
     O: crate::Iterator,
     F: FnMut(O::Item) -> B,
