@@ -8,8 +8,8 @@ pub trait IntoIterator {
 }
 
 pub struct IntoIter<T> {
-    pub(super) current: *mut T,
-    pub(super) end: *mut T,
+    pub(super) current: *const T,
+    pub(super) end: *const T,
 }
 
 impl<T> crate::Iterator for IntoIter<T> {
@@ -35,15 +35,24 @@ impl<T> crate::IntoIterator for Vec<T> {
     type IntoIter = crate::IntoIter<T>;
     fn into_iter(self) -> Self::IntoIter {
         let len = self.len();
-        if len == 0 {
-            return Self::IntoIter {
-                current: ptr::null_mut(),
-                end: ptr::null_mut(),
-            };
-        }
-        let first = self.leak().first_mut().unwrap() as *mut T;
+        let first = self.leak().first().map_or(ptr::null(), |r| r as *const T);
         let end = unsafe { first.add(len) };
-
+        Self::IntoIter {
+            current: first,
+            end,
+        }
+    }
+}
+impl<T, const N: usize> crate::IntoIterator for [T; N] {
+    type Item = T;
+    type IntoIter = crate::IntoIter<T>;
+    fn into_iter(self) -> Self::IntoIter {
+        let len = self.len();
+        let first = match self.first() {
+            None => ptr::null(),
+            Some(r) => r as *const T,
+        };
+        let end = unsafe { first.add(len) };
         Self::IntoIter {
             current: first,
             end,
@@ -55,8 +64,19 @@ impl<T> crate::IntoIterator for Vec<T> {
 mod tests {
     use crate::Iterator;
     #[test]
-    fn into_iter() {
+    fn vec() {
         let items = vec![0, 1, 2, 3, 4];
+        let mut into_iter = crate::IntoIterator::into_iter(items);
+        assert_eq!(into_iter.next(), Some(0));
+        assert_eq!(into_iter.next(), Some(1));
+        assert_eq!(into_iter.next(), Some(2));
+        assert_eq!(into_iter.next(), Some(3));
+        assert_eq!(into_iter.next(), Some(4));
+        assert_eq!(into_iter.next(), None);
+    }
+    #[test]
+    fn array() {
+        let items = [0, 1, 2, 3, 4];
         let mut into_iter = crate::IntoIterator::into_iter(items);
         assert_eq!(into_iter.next(), Some(0));
         assert_eq!(into_iter.next(), Some(1));
