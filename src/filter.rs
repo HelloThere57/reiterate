@@ -1,6 +1,8 @@
+use crate::Iterator;
+
 pub struct Filter<O, F>
 where
-    O: crate::Iterator,
+    O: Iterator,
     F: Fn(&O::Item) -> bool,
 {
     outer: O,
@@ -9,7 +11,7 @@ where
 
 impl<O, F> Filter<O, F>
 where
-    O: crate::Iterator,
+    O: Iterator,
     F: Fn(&O::Item) -> bool,
 {
     pub fn new(outer: O, f: F) -> Self {
@@ -17,9 +19,9 @@ where
     }
 }
 
-impl<O, F> crate::Iterator for Filter<O, F>
+impl<O, F> Iterator for Filter<O, F>
 where
-    O: crate::Iterator,
+    O: Iterator,
     F: Fn(&O::Item) -> bool,
 {
     type Item = O::Item;
@@ -35,12 +37,12 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::{Filter, Iterator};
+    use crate::{Filter, IntoIterator, Iterator};
 
     #[test]
     fn all() {
         let items: Vec<i32> = vec![0, 1, 2, 3];
-        let iter = crate::IntoIterator::into_iter(items);
+        let iter = IntoIterator::into_iter(items);
         let mut filtered = Filter::new(iter, |_| true);
 
         assert_eq!(filtered.next(), Some(0));
@@ -52,7 +54,7 @@ mod tests {
     #[test]
     fn none() {
         let items: Vec<i32> = vec![0, 1, 2, 3];
-        let iter = crate::IntoIterator::into_iter(items);
+        let iter = IntoIterator::into_iter(items);
         let mut filtered = Filter::new(iter, |_| false);
 
         assert_eq!(filtered.next(), None);
@@ -60,7 +62,7 @@ mod tests {
     #[test]
     fn even() {
         let items: Vec<i32> = vec![0, 1, 2, 3];
-        let iter = crate::IntoIterator::into_iter(items);
+        let iter = IntoIterator::into_iter(items);
         let mut filtered = Filter::new(iter, |n| n % 2 == 0);
 
         assert_eq!(filtered.next(), Some(0));
@@ -70,7 +72,7 @@ mod tests {
     #[test]
     fn strings() {
         let items: Vec<&str> = vec!["ab", "cd", "e", "f"];
-        let iter = crate::IntoIterator::into_iter(items);
+        let iter = IntoIterator::into_iter(items);
         let mut filtered = Filter::new(iter, |s| s.len() == 2);
 
         assert_eq!(filtered.next(), Some("ab"));

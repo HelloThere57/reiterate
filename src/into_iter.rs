@@ -1,8 +1,10 @@
 use std::ptr;
 
+use crate::Iterator;
+
 pub trait IntoIterator {
     type Item;
-    type IntoIter: crate::Iterator<Item = Self::Item>;
+    type IntoIter: Iterator<Item = Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter;
 }
@@ -12,7 +14,7 @@ pub struct IntoIter<T> {
     pub(super) end: *const T,
 }
 
-impl<T> crate::Iterator for IntoIter<T> {
+impl<T> Iterator for IntoIter<T> {
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
         if self.current.is_null() {
@@ -30,9 +32,9 @@ impl<T> crate::Iterator for IntoIter<T> {
     }
 }
 
-impl<T> crate::IntoIterator for Vec<T> {
+impl<T> IntoIterator for Vec<T> {
     type Item = T;
-    type IntoIter = crate::IntoIter<T>;
+    type IntoIter = IntoIter<T>;
     fn into_iter(self) -> Self::IntoIter {
         let len = self.len();
         let first = self.leak().first().map_or(ptr::null(), |r| r as *const T);
@@ -43,9 +45,9 @@ impl<T> crate::IntoIterator for Vec<T> {
         }
     }
 }
-impl<T, const N: usize> crate::IntoIterator for [T; N] {
+impl<T, const N: usize> IntoIterator for [T; N] {
     type Item = T;
-    type IntoIter = crate::IntoIter<T>;
+    type IntoIter = IntoIter<T>;
     fn into_iter(self) -> Self::IntoIter {
         let len = self.len();
         let first = match self.first() {
@@ -60,13 +62,24 @@ impl<T, const N: usize> crate::IntoIterator for [T; N] {
     }
 }
 
+impl<I> IntoIterator for I
+where
+    I: Iterator,
+{
+    type Item = I::Item;
+    type IntoIter = I;
+    fn into_iter(self) -> Self::IntoIter {
+        self
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::Iterator;
+    use crate::{IntoIterator, Iterator};
     #[test]
     fn vec() {
         let items = vec![0, 1, 2, 3, 4];
-        let mut into_iter = crate::IntoIterator::into_iter(items);
+        let mut into_iter = IntoIterator::into_iter(items);
         assert_eq!(into_iter.next(), Some(0));
         assert_eq!(into_iter.next(), Some(1));
         assert_eq!(into_iter.next(), Some(2));
@@ -77,7 +90,7 @@ mod tests {
     #[test]
     fn array() {
         let items = [0, 1, 2, 3, 4];
-        let mut into_iter = crate::IntoIterator::into_iter(items);
+        let mut into_iter = IntoIterator::into_iter(items);
         assert_eq!(into_iter.next(), Some(0));
         assert_eq!(into_iter.next(), Some(1));
         assert_eq!(into_iter.next(), Some(2));

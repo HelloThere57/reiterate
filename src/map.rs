@@ -1,10 +1,12 @@
+use crate::Iterator;
+
 pub struct Map<O, F> {
     outer: O,
     f: F,
 }
 impl<O, F, B> Map<O, F>
 where
-    O: crate::Iterator,
+    O: Iterator,
     F: FnMut(O::Item) -> B,
 {
     pub fn new(outer: O, f: F) -> Self {
@@ -12,9 +14,9 @@ where
     }
 }
 
-impl<O, F, B> crate::Iterator for Map<O, F>
+impl<O, F, B> Iterator for Map<O, F>
 where
-    O: crate::Iterator,
+    O: Iterator,
     F: FnMut(O::Item) -> B,
 {
     type Item = B;
@@ -25,12 +27,12 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::Iterator;
+    use crate::{IntoIterator, Iterator, Map};
     #[test]
     fn squares() {
         let items = vec![0i32, 1, 2, 3, 4, 5];
-        let iter = crate::IntoIterator::into_iter(items);
-        let mut map = crate::Map::new(iter, |n| n * n);
+        let iter = IntoIterator::into_iter(items);
+        let mut map = Map::new(iter, |n| n * n);
         assert_eq!(map.next(), Some(0));
         assert_eq!(map.next(), Some(1));
         assert_eq!(map.next(), Some(4));
@@ -42,8 +44,8 @@ mod tests {
     #[test]
     fn strings() {
         let items = vec!["a", "b", "c", "d"];
-        let iter = crate::IntoIterator::into_iter(items);
-        let mut map = crate::Map::new(iter, String::from);
+        let iter = IntoIterator::into_iter(items);
+        let mut map = Map::new(iter, String::from);
         assert_eq!(map.next(), Some(String::from("a")));
         assert_eq!(map.next(), Some(String::from("b")));
         assert_eq!(map.next(), Some(String::from("c")));
